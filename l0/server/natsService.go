@@ -1,4 +1,4 @@
-package l0
+package server
 
 type natsService struct {
 }

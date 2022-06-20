@@ -1,4 +1,4 @@
-package l0
+package db
 
 import "database/sql"
 
