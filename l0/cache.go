@@ -1,4 +1,4 @@
-package cache
+package l0
 
 import (
 	"errors"
@@ -35,7 +35,7 @@ func NewCache(defaultExpiration, cleanupInterval time.Duration) *Cache {
 }
 
 //запихиваем в кеш значение, возможна перезапись существующего элемента
-func (s *Cache) set(key string, value interface{}, duration time.Duration) {
+func (s *Cache) Set(key string, value interface{}, duration time.Duration) {
 	var expiration int64
 	//определение продолжительности жизни айтема
 	if duration == 0 {
