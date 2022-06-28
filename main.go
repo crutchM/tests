@@ -1,17 +1,29 @@
 package main
 
 import (
+	"fmt"
 	"github.com/sirupsen/logrus"
-	"tests/l0"
+	"tests/l0/data"
+	"tests/l0/db"
+	"tests/l0/repo"
+	"tests/l0/server"
 )
 
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
-	cache := l0.NewCache(0, 0)
-	db, err := l0.NewConnection()
+	cache := data.NewCache(0, 0)
+	dab, err := db.NewConnection()
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	cont := l0.NewDataBase(db)
+	cont := db.NewDataBase(dab)
+	repo := repo.NewRepository(cont, cache)
+	hand := server.NewHandler(repo)
+	srv := new(server.Server)
+	receiver := server.NewReceiver("test-cluster", repo)
+
+	go receiver.Receive()
+	go srv.Run("8080", hand.InitRoutes())
+	fmt.Scanln()
 
 }

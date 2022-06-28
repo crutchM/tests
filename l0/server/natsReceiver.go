@@ -1,18 +1,20 @@
-package l0
+package server
 
 import (
 	"encoding/json"
 	"github.com/nats-io/stan.go"
 	"github.com/sirupsen/logrus"
+	"tests/l0/data"
+	"tests/l0/repo"
 	"time"
 )
 
 type Receiver struct {
 	con  stan.Conn
-	repo *Repository
+	repo *repo.Repository
 }
 
-func NewReceiver(token string, repo *Repository) *Receiver {
+func NewReceiver(token string, repo *repo.Repository) *Receiver {
 	nc, err := stan.Connect("test-cluster", "subscriber", stan.NatsURL("nats://192.168.0.104:4422"))
 	if err != nil {
 		logrus.Error(err)
@@ -23,7 +25,7 @@ func NewReceiver(token string, repo *Repository) *Receiver {
 }
 
 func (s *Receiver) Receive() {
-	var item Order
+	var item data.Order
 	sub, err := s.con.Subscribe("l0", func(msg *stan.Msg) {
 		err := json.Unmarshal(msg.Data, &item)
 		if err != nil {
@@ -31,6 +33,7 @@ func (s *Receiver) Receive() {
 			return
 		}
 		s.repo.Write(item)
+		logrus.Info("объект успешно получен из канала и записан в базу")
 	},
 		stan.DeliverAllAvailable())
 	if err != nil {
