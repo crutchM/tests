@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/nats-io/stan.go"
 	"github.com/sirupsen/logrus"
 	"tests/l0/data"
@@ -25,8 +26,9 @@ func NewReceiver(token string, repo *repo.Repository) *Receiver {
 }
 
 func (s *Receiver) Receive() {
+
 	var item data.Order
-	sub, err := s.con.Subscribe("l0", func(msg *stan.Msg) {
+	sub, err := s.con.Subscribe("l0-task", func(msg *stan.Msg) {
 		err := json.Unmarshal(msg.Data, &item)
 		if err != nil {
 			logrus.Info(err.Error())
@@ -35,9 +37,10 @@ func (s *Receiver) Receive() {
 		s.repo.Write(item)
 		logrus.Info("объект успешно получен из канала и записан в базу")
 	},
-		stan.DeliverAllAvailable())
+		stan.StartWithLastReceived())
 	if err != nil {
 		sub.Close()
 		s.con.Close()
 	}
+	fmt.Scanln()
 }

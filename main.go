@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
+	"sync"
 	"tests/l0/data"
 	"tests/l0/db"
 	"tests/l0/repo"
@@ -17,13 +19,15 @@ func main() {
 		logrus.Fatal(err)
 	}
 	cont := db.NewDataBase(dab)
-	repo := repo.NewRepository(cont, cache)
-	hand := server.NewHandler(repo)
+	rep := repo.NewRepository(cont, cache)
+	hand := server.NewHandler(rep)
 	srv := new(server.Server)
-	receiver := server.NewReceiver("test-cluster", repo)
-
+	receiver := server.NewReceiver("test-cluster", rep)
+	wg := sync.WaitGroup{}
+	wg.Add(1)
 	go receiver.Receive()
 	go srv.Run("8080", hand.InitRoutes())
+	wg.Wait()
 	fmt.Scanln()
 
 }

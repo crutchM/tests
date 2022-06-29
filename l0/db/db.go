@@ -17,7 +17,7 @@ func NewDataBase(db *sqlx.DB) *DataBase {
 
 func (s *DataBase) Write(value data.Order) {
 	s.Lock()
-	s.db.QueryRow("insert into Order(orderUid, trackNumber,  entry, locale, internalSignature, customerId, deliveryService, shardKey, smId, dateCreated, oofShard)"+
+	s.db.QueryRow("insert into order(orderUid, trackNumber,  entry, locale, internalSignature, customerId, deliveryService, shardKey, smId, dateCreated, oofShard)"+
 		"values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)", value.Uid, value.Track, value.Entry, value.Locale,
 		value.InternalSignature, value.Customer, value.DeliveryService, value.ShardKey, value.SmId, value.DateCreated, value.OofShard)
 	s.insertIntoPayment(value.Payment, value.Uid)
@@ -30,7 +30,7 @@ func (s *DataBase) Write(value data.Order) {
 
 func (s *DataBase) insertIntoDelivery(delivery data.Delivery, orderId string) int {
 	var id int
-	row := s.db.QueryRow("INSERT INTO delivery(name, phone, zip, city, address, region, email, orderID) "+
+	row := s.db.QueryRow("INSERT INTO delivery(name, phone, zip, city, address, region, email, orderId) "+
 		"values ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id", delivery.Name, delivery.Phone, delivery.Zip, delivery.City, delivery.Address, delivery.Region, delivery.Email, orderId)
 	if err := row.Scan(&id); err != nil {
 		return 0
@@ -67,7 +67,7 @@ func (s *DataBase) GetRow(id string) data.Order {
 	var delivery data.Delivery
 	var payment data.Payment
 	var items []data.OrderItem
-	err := s.db.Get(&order, "select orderUid, trackNumber,  entry, locale, internalSignature, customerId, deliveryService, shardKey, smId, dateCreated, oofShard from order where uid=$1", id)
+	err := s.db.Get(&order, "select orderUid, trackNumber,  entry, locale, internalSignature, customerId, deliveryService, shardKey, smId, dateCreated, oofShard from order where orderUid=$1", id)
 	if err != nil {
 		return data.Order{}
 	}
