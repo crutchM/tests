@@ -16,7 +16,7 @@ type Receiver struct {
 }
 
 func NewReceiver(token string, repo *repo.Repository) *Receiver {
-	nc, err := stan.Connect("test-cluster", "subscriber", stan.NatsURL("nats://192.168.0.104:4422"))
+	nc, err := stan.Connect("test-cluster", "subscriber")
 	if err != nil {
 		logrus.Error(err)
 		time.Sleep(5 * time.Second)
@@ -34,8 +34,8 @@ func (s *Receiver) Receive() {
 			logrus.Info(err.Error())
 			return
 		}
+		logrus.Info("объект принят из канала:\n" + fmt.Sprint(item))
 		s.repo.Write(item)
-		logrus.Info("объект успешно получен из канала и записан в базу")
 	},
 		stan.StartWithLastReceived())
 	if err != nil {

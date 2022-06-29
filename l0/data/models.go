@@ -41,13 +41,13 @@ type Payment struct {
 }
 
 type OrderItem struct {
-	ChrtId      int    `json:"chrt_id" db:"chrtId"`
+	ChrtId      int    `json:"chrt_id" db:"id"`
 	TrackNumber string `json:"track_number" db:"trackNumber"`
 	Price       int    `json:"price" db:"price"`
 	Rid         string `json:"rid" db:"rid"`
 	Name        string `json:"name" db:"name"`
 	Sale        int    `json:"sale" db:"sale"`
-	Size        int    `json:"size" db:"si"`
+	Size        string `json:"size" db:"si"`
 	TotalPrice  int    `json:"total_price" db:"totalPrice"`
 	NmId        int    `json:"nm_id" db:"nmId"`
 	Brand       string `json:"brand" db:"brand"`

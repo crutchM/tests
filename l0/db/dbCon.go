@@ -10,7 +10,7 @@ type Connection struct {
 
 func NewConnection() (*sqlx.DB, error) {
 	db, err := sqlx.Open("postgres",
-		fmt.Sprintf("postgres://habrpguser:pgpwd4habr@192.168.0.104:5432/postgres?sslmode=disable"))
+		fmt.Sprintf("postgres://habrpguser:pgpwd4habr@localhost:5432/postgres?sslmode=disable"))
 	if err != nil {
 		return nil, err
 	}

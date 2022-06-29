@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"sync"
 	"tests/l0/data"
@@ -17,10 +18,21 @@ func NewDataBase(db *sqlx.DB) *DataBase {
 
 func (s *DataBase) Write(value data.Order) {
 	s.Lock()
-	s.db.QueryRow("insert into order(orderUid, trackNumber,  entry, locale, internalSignature, customerId, deliveryService, shardKey, smId, dateCreated, oofShard)"+
+
+	tx, err := s.db.Beginx()
+	if err != nil {
+		return
+	}
+	tx.QueryRow("insert into orders(\"orderUid\", \"trackNumber\",  \"entry\", \"locale\", \"internalSignature\", \"customerId\", \"deliveryService\", \"shardKey\", \"smId\", \"dateCreated\", \"oofShard\")"+
 		"values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)", value.Uid, value.Track, value.Entry, value.Locale,
 		value.InternalSignature, value.Customer, value.DeliveryService, value.ShardKey, value.SmId, value.DateCreated, value.OofShard)
-	s.insertIntoPayment(value.Payment, value.Uid)
+	//if err := row.Scan(&uid); err != nil {
+	//	logrus.Info(err.Error())
+	//	return
+	//}
+	tx.Commit()
+	i := s.insertIntoPayment(value.Payment, value.Uid)
+	fmt.Println(i)
 	s.insertIntoDelivery(value.Delivery, value.Uid)
 	for _, val := range value.Items {
 		s.insertIntoItem(val, value.Uid)
@@ -30,9 +42,10 @@ func (s *DataBase) Write(value data.Order) {
 
 func (s *DataBase) insertIntoDelivery(delivery data.Delivery, orderId string) int {
 	var id int
-	row := s.db.QueryRow("INSERT INTO delivery(name, phone, zip, city, address, region, email, orderId) "+
-		"values ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id", delivery.Name, delivery.Phone, delivery.Zip, delivery.City, delivery.Address, delivery.Region, delivery.Email, orderId)
+	row := s.db.QueryRow("INSERT INTO deliveries (\"name\", \"phone\", \"zip\", \"city\", \"address\", \"region\", \"email\", \"orderId\") "+
+		"values ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING deliveries.id", delivery.Name, delivery.Phone, delivery.Zip, delivery.City, delivery.Address, delivery.Region, delivery.Email, orderId)
 	if err := row.Scan(&id); err != nil {
+		fmt.Println(err.Error())
 		return 0
 	}
 	return id
@@ -40,21 +53,23 @@ func (s *DataBase) insertIntoDelivery(delivery data.Delivery, orderId string) in
 
 func (s *DataBase) insertIntoPayment(payment data.Payment, orderId string) int {
 	var id int
-	row := s.db.QueryRow("INSERT INTO payment(trans, requestId, currency, provider, amount, paymentDt, bank, deliveryCost, goodsTotal, customFee, orderId)"+
-		"VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id",
+	row := s.db.QueryRow("INSERT INTO payments (\"trans\", \"requestId\", \"currency\", \"provider\", \"amount\", \"paymentDt\", \"bank\", \"deliveryCost\", \"goodsTotal\", \"customFee\", \"orderId\")"+
+		"VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING payments.id",
 		payment.Transaction, payment.RequestId, payment.Currency, payment.Provider, payment.Amount, payment.PaymentDt, payment.Bank, payment.DeliveryCost, payment.GoodsTotal, payment.CustomFee, orderId)
 
 	if err := row.Scan(&id); err != nil {
+		fmt.Println(err.Error())
 		return 0
 	}
 	return id
 }
 func (s *DataBase) insertIntoItem(item data.OrderItem, orderId string) int {
 	var id int
-	row := s.db.QueryRow("INSERT INTO item(chrtId, trackNumber, price, rid, name, sale, si, totalPrice, nmId, brand, status, orderId)"+
-		"values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id",
+	row := s.db.QueryRow("INSERT INTO items (\"id\", \"trackNumber\", \"price\", \"rid\", \"name\", \"sale\", \"si\", \"totalPrice\", \"nmId\", \"brand\", \"status\", \"orderId\")"+
+		"values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING items.id",
 		item.ChrtId, item.TrackNumber, item.Price, item.Rid, item.Name, item.Sale, item.Size, item.TotalPrice, item.NmId, item.Brand, item.Status, orderId)
 	if err := row.Scan(&id); err != nil {
+		fmt.Println(err.Error())
 		return 0
 	}
 	return id

@@ -26,7 +26,7 @@ func main() {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go receiver.Receive()
-	go srv.Run("8080", hand.InitRoutes())
+	srv.Run("8080", hand.InitRoutes())
 	wg.Wait()
 	fmt.Scanln()
 
