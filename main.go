@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"sync"
@@ -28,6 +27,4 @@ func main() {
 	go receiver.Receive()
 	srv.Run("8080", hand.InitRoutes())
 	wg.Wait()
-	fmt.Scanln()
-
 }

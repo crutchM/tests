@@ -1,9 +1,6 @@
 package repo
 
 import (
-	"bytes"
-	"encoding/gob"
-	"encoding/json"
 	"fmt"
 	"tests/l0/data"
 	"tests/l0/db"
@@ -25,22 +22,24 @@ func (s *Repository) Write(value data.Order) {
 	s.db.Write(value)
 }
 
-func (s *Repository) Get(id string) data.Order {
+func (s *Repository) Get(id string) interface{} {
 	value, err := s.cache.Get(id)
 	if !err {
 		value := s.db.GetRow(id)
+		if value.Uid == "" {
+			return data.Order{}
+		}
 		s.cache.Set(value.Uid, value, 0)
+		s.Get(id)
 	}
-	var order data.Order
-	buf := &bytes.Buffer{}
-	gob.NewEncoder(buf).Encode(fmt.Sprint(value))
-	marshaled, _ := json.Marshal(buf.Bytes())
-	json.Unmarshal(marshaled, &order)
-	return order
+	return value
 }
 
 func (s *Repository) fillCache() {
-	for _, v := range s.db.GetAll() {
+	values := s.db.GetAll()
+	for _, v := range values {
 		s.cache.Set(v.Uid, v, 0)
 	}
+	all := s.cache.GetAll()
+	fmt.Println(all)
 }

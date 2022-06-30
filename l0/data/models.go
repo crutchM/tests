@@ -1,13 +1,13 @@
 package data
 
 type Order struct {
-	Uid               string      `json:"order_uid" db:"orderUid"`
+	Uid               string      `json:"order_uid" db:"uid"`
 	Track             string      `json:"track_number" db:"trackNumber"`
 	Entry             string      `json:"entry" db:"entry"`
-	Delivery          Delivery    `json:"delivery" db:"locale"`
+	Delivery          Delivery    `json:"delivery" db:""`
 	Payment           Payment     `json:"payment" db:""`
 	Items             []OrderItem `json:"items" db:""`
-	Locale            string      `json:"locale" db:""`
+	Locale            string      `json:"locale" db:"locale"`
 	InternalSignature string      `json:"internal_signature" db:"internalSignature"`
 	Customer          string      `json:"customer_id" db:"customerId"`
 	DeliveryService   string      `json:"delivery_service" db:"deliveryService"`
