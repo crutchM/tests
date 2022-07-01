@@ -2,9 +2,11 @@ package db
 
 import (
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	"sync"
 	"tests/l0/data"
+
+	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 )
 
 type DataBase struct {
@@ -23,13 +25,18 @@ func (s *DataBase) Write(value data.Order) {
 	if err != nil {
 		return
 	}
-	tx.QueryRow("insert into orders(uid, \"trackNumber\",  \"entry\", \"locale\", \"internalSignature\", \"customerId\", \"deliveryService\", \"shardKey\", \"smId\", \"dateCreated\", \"oofShard\")"+
+	row := tx.QueryRow("insert into orders(uid, \"trackNumber\",  \"entry\", \"locale\", \"internalSignature\", \"customerId\", \"deliveryService\", \"shardKey\", \"smId\", \"dateCreated\", \"oofShard\")"+
 		"values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)", value.Uid, value.Track, value.Entry, value.Locale,
 		value.InternalSignature, value.Customer, value.DeliveryService, value.ShardKey, value.SmId, value.DateCreated, value.OofShard)
 	//if err := row.Scan(&uid); err != nil {
 	//	logrus.Info(err.Error())
 	//	return
 	//}
+	if row.Err() != nil {
+		logrus.Info(row.Err())
+		tx.Rollback()
+		return
+	}
 	tx.Commit()
 	i := s.insertIntoPayment(value.Payment, value.Uid)
 	fmt.Println(i)
