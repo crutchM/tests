@@ -6,19 +6,19 @@ import (
 )
 
 func main() {
-	go sender()
-	time.Sleep(2 * time.Second)
+	ch := make(chan int)
+	go sender(ch)
+	go receiver(ch)
+	time.Sleep(10 * time.Second)
 	fmt.Println("Прошло 2 секунды, выключаюсь")
 }
 
-func sender() {
-	ch := make(chan int)
-	defer close(ch)
-	go receiver(ch)
+func sender(ch chan int) {
 	for i := 0; i < 1000; i++ {
 		ch <- i
-		time.Sleep(time.Second / 10)
+		time.Sleep(time.Millisecond)
 	}
+	close(ch)
 }
 
 func receiver(ch chan int) {
@@ -26,6 +26,8 @@ func receiver(ch chan int) {
 		select {
 		case val := <-ch:
 			fmt.Println(val)
+		default:
+			continue
 		}
 	}
 }

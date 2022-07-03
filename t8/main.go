@@ -28,9 +28,9 @@ func change(number int, index int) {
 		i = index - 1
 	}
 	if b[i] == 48 {
-		b[i] = 49
+		b[i]++
 	} else {
-		b[i] = 48
+		b[i]--
 	}
 	fmt.Println(string(b))
 	v, err := strconv.ParseInt(string(b), 2, 64)
