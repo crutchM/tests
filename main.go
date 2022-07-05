@@ -1,17 +1,19 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
+
+func update(p *int) {
+	b := 2
+	p = &b
+	fmt.Println(p)
+}
 
 func main() {
-	slice := []string{"a", "a"}
-
-	func(slice []string) {
-		slice = append(slice, "a")
-		slice[0] = "b"
-		slice[1] = "b"
-		fmt.Print(slice)
-	}(slice)
-	fmt.Print(slice)
+	var (
+		a = 1
+		p = &a
+	)
+	fmt.Println(*p)
+	update(p)
+	fmt.Println(p)
 }
